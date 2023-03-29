@@ -22,10 +22,10 @@ public class BinarySearchAutocomplete implements Autocompletor {
 	 * it.
 	 * 
 	 * @param terms
-	 *            - A list of words to form terms from
+	 *                - A list of words to form terms from
 	 * @param weights
-	 *            - A corresponding list of weights, such that terms[i] has
-	 *            weight[i].
+	 *                - A corresponding list of weights, such that terms[i] has
+	 *                weight[i].
 	 * @return a BinarySearchAutocomplete whose myTerms object has myTerms[i] =
 	 *         a Term with word terms[i] and weight weights[i].
 	 * @throws NullPointerException if either argument passed in is null
@@ -34,8 +34,8 @@ public class BinarySearchAutocomplete implements Autocompletor {
 		if (terms == null || weights == null) {
 			throw new NullPointerException("One or more arguments null");
 		}
-		
-		initialize(terms,weights);
+
+		initialize(terms, weights);
 	}
 
 	/**
@@ -45,12 +45,12 @@ public class BinarySearchAutocomplete implements Autocompletor {
 	 * where n is the size of a.
 	 * 
 	 * @param a
-	 *            - The array of Terms being searched
+	 *                   - The array of Terms being searched
 	 * @param key
-	 *            - The key being searched for.
+	 *                   - The key being searched for.
 	 * @param comparator
-	 *            - A comparator, used to determine equivalency between the
-	 *            values in a and the key.
+	 *                   - A comparator, used to determine equivalency between the
+	 *                   values in a and the key.
 	 * @return The first index i for which comparator considers a[i] and key as
 	 *         being equal. If no such index exists, return -1 instead.
 	 */
@@ -63,12 +63,12 @@ public class BinarySearchAutocomplete implements Autocompletor {
 	 * The same as firstIndexOf, but instead finding the index of the last Term.
 	 * 
 	 * @param a
-	 *            - The array of Terms being searched
+	 *                   - The array of Terms being searched
 	 * @param key
-	 *            - The key being searched for.
+	 *                   - The key being searched for.
 	 * @param comparator
-	 *            - A comparator, used to determine equivalency between the
-	 *            values in a and the key.
+	 *                   - A comparator, used to determine equivalency between the
+	 *                   values in a and the key.
 	 * @return The last index i for which comparator considers a[i] and key as
 	 *         being equal. If no such index exists, return -1 instead.
 	 */
@@ -87,55 +87,72 @@ public class BinarySearchAutocomplete implements Autocompletor {
 	 * 2) should return {"air"}
 	 * 
 	 * @param prefix
-	 *            - A prefix which all returned words must start with
+	 *               - A prefix which all returned words must start with
 	 * @param k
-	 *            - The (maximum) number of words to be returned
+	 *               - The (maximum) number of words to be returned
 	 * @return An array of the k words with the largest weights among all words
 	 *         starting with prefix, in descending weight order. If less than k
 	 *         such words exist, return an array containing all those words If
 	 *         no such words exist, reutrn an empty array
 	 * @throws NullPointerException if prefix is null
 	 */
-	
+
 	@Override
 	public List<Term> topMatches(String prefix, int k) {
 		if (k < 0) {
-			throw new IllegalArgumentException("Illegal value of k:"+k);
+			throw new IllegalArgumentException("Illegal value of k:" + k);
+		}
+		if (k==0){
+			List <Term> retList = new ArrayList<>();
+			return retList;
 		}
 
-		Term dummy = new Term(prefix,0);
+		Term dummy = new Term(prefix, 0);
 		PrefixComparator comp = PrefixComparator.getComparator(prefix.length());
 		int first = firstIndexOf(myTerms, dummy, comp);
 		int last = lastIndexOf(myTerms, dummy, comp);
 
-		if (first == -1) {               // prefix not found
+		if (first == -1) {          // prefix not found
 			return new ArrayList<>();
 		}
 
-		// write code here for P5 assignment
+		PriorityQueue<Term> queue1 = new PriorityQueue<>(1 + last - first, Comparator.comparing(Term::getWeight));
+		for (int i = first; i <= last; i++) {
+			Term curr = myTerms[i];
+			if (queue1.size() < k) {
+				queue1.add(curr);
 
-		return null;
-	
+			} else if (queue1.peek().getWeight() < curr.getWeight()) {
+				queue1.remove();
+				queue1.add(curr);
+			}
+		}
+		LinkedList<Term> final1 = new LinkedList<>();
+		int size = queue1.size();
+		for (int i = 0; i < size; i++) {
+			final1.addFirst(queue1.remove());
+		}
+		return final1;
 	}
 
 	@Override
 	public void initialize(String[] terms, double[] weights) {
 		myTerms = new Term[terms.length];
-		
+
 		for (int i = 0; i < terms.length; i++) {
 			myTerms[i] = new Term(terms[i], weights[i]);
 		}
-		
+
 		Arrays.sort(myTerms);
 	}
-	
+
 	@Override
 	public int sizeInBytes() {
 		if (mySize == 0) {
-			
-			for(Term t : myTerms) {
-			    mySize += BYTES_PER_DOUBLE + 
-			    		  BYTES_PER_CHAR*t.getWord().length();	
+
+			for (Term t : myTerms) {
+				mySize += BYTES_PER_DOUBLE +
+						BYTES_PER_CHAR*t.getWord().length();
 			}
 		}
 		return mySize;

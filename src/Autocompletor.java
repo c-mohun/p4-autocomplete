@@ -1,13 +1,4 @@
 import java.util.List;
-
-/**
- * An Autocompletor supports returning either the top k best matches, or the
- * single top match, given a String prefix.
- * 
- * @author Austin Lu
- * @author Owen Astrachan changed API from Iterable to List
- * @author Owen Astrachan added size constants
- */
 public interface Autocompletor {
 	
 	public static int BYTES_PER_DOUBLE = 8;
