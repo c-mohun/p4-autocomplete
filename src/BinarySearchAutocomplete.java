@@ -5,9 +5,6 @@ import java.util.*;
  * Using a sorted array of Term objects, this implementation uses binary search
  * to find the top term(s).
  * 
- * @author Austin Lu, adapted from Kevin Wayne
- * @author Jeff Forbes
- * @author Owen Astrachan in Fall 2018, revised API
  */
 public class BinarySearchAutocomplete implements Autocompletor {
 
@@ -102,36 +99,36 @@ public class BinarySearchAutocomplete implements Autocompletor {
 		if (k < 0) {
 			throw new IllegalArgumentException("Illegal value of k:" + k);
 		}
-		if (k==0){
-			List <Term> retList = new ArrayList<>();
-			return retList;
+
+		if (k == 0) {
+			return new ArrayList<>();
 		}
+
+		List<Term> final1 = new ArrayList<>();
 
 		Term dummy = new Term(prefix, 0);
 		PrefixComparator comp = PrefixComparator.getComparator(prefix.length());
 		int first = firstIndexOf(myTerms, dummy, comp);
 		int last = lastIndexOf(myTerms, dummy, comp);
 
-		if (first == -1) {          // prefix not found
-			return new ArrayList<>();
-		}
+		if (first != -1) {
+			PriorityQueue<Term> queue1 = new PriorityQueue<>(1 + last - first, Comparator.comparing(Term::getWeight));
+			for (int i = first; i <= last; i++) {
+				Term curr = myTerms[i];
+				if (queue1.size() < k) {
+					queue1.add(curr);
+				} else if (queue1.peek().getWeight() < curr.getWeight()) {
+					queue1.remove();
+					queue1.add(curr);
+				}
+			}
 
-		PriorityQueue<Term> queue1 = new PriorityQueue<>(1 + last - first, Comparator.comparing(Term::getWeight));
-		for (int i = first; i <= last; i++) {
-			Term curr = myTerms[i];
-			if (queue1.size() < k) {
-				queue1.add(curr);
-
-			} else if (queue1.peek().getWeight() < curr.getWeight()) {
-				queue1.remove();
-				queue1.add(curr);
+			int size = queue1.size();
+			for (int i = 0; i < size; i++) {
+				final1.add(queue1.remove());
 			}
 		}
-		LinkedList<Term> final1 = new LinkedList<>();
-		int size = queue1.size();
-		for (int i = 0; i < size; i++) {
-			final1.addFirst(queue1.remove());
-		}
+
 		return final1;
 	}
 
@@ -142,17 +139,14 @@ public class BinarySearchAutocomplete implements Autocompletor {
 		for (int i = 0; i < terms.length; i++) {
 			myTerms[i] = new Term(terms[i], weights[i]);
 		}
-
 		Arrays.sort(myTerms);
 	}
 
 	@Override
 	public int sizeInBytes() {
 		if (mySize == 0) {
-
-			for (Term t : myTerms) {
-				mySize += BYTES_PER_DOUBLE +
-						BYTES_PER_CHAR*t.getWord().length();
+			for (Term x : myTerms) {
+				mySize = mySize + BYTES_PER_DOUBLE + BYTES_PER_CHAR * x.getWord().length();
 			}
 		}
 		return mySize;

@@ -5,9 +5,6 @@ import java.util.Comparator;
  * without calling new. Users simply use
  *
  *     Comparator<Term> comp = PrefixComparator.getComparator(size)
- *
- * @author owen astrachan
- * @date October 8, 2020
  */
 public class PrefixComparator implements Comparator<Term> {
 

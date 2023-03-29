@@ -17,19 +17,23 @@ public class HashListAutocomplete implements Autocompletor {
     public void initialize(String[] terms, double[] weights) {
         myMap = new HashMap<>();
         for (int i = 0; i < terms.length; i++) {
-            String curr = terms[i];
+            String term = terms[i];
             double weight = weights[i];
-            Term term = new Term(curr, weight);
-            int maxIndex = Math.min(curr.length(), MAX_PREFIX);
-            for (int z = 0; z <= maxIndex; z++) {
-                String substring = curr.substring(0, z);
-                myMap.putIfAbsent(substring, new ArrayList<>());
-                myMap.get(substring).add(term);
+            Term newTerm = new Term(term, weight);
+            for (int prefixLength = 1; prefixLength <= term.length(); prefixLength++) {
+                String prefix = term.substring(0, prefixLength);
+                List<Term> termList = myMap.get(prefix);
+                if (termList == null) {
+                    termList = new ArrayList<>();
+                    myMap.put(prefix, termList);
+                }
+
+                termList.add(newTerm);
             }
         }
 
-        for (String curr1:myMap.keySet()) {
-            Collections.sort(myMap.get(curr1), (Comparator.comparing(Term::getWeight).reversed()));
+        for (List<Term> termList :myMap.values()) {
+            termList.sort(Comparator.comparing(Term::getWeight).reversed());
         }
     }
 
