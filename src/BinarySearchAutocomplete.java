@@ -124,7 +124,7 @@ public class BinarySearchAutocomplete implements Autocompletor {
 			}
 
 			int size = queue1.size();
-			for (int i = 0; i < size; i++) {
+			for (int i = size; i >=0; i--) {
 				final1.add(queue1.remove());
 			}
 		}
